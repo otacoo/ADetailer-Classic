@@ -750,11 +750,15 @@ class AfterDetailerScript(scripts.Script):
 
             self.fix_p2(p, p2, pp, args, pred, j)
 
-            processed = process_images(p2)
+            try:
+                processed = process_images(p2)
+            except Exception as e:
+                errors.display(e, "running ADetailer subprocessing")
+                processed = None
 
             p2.close()
 
-            if not processed.images:
+            if processed is None or not processed.images:
                 processed = None
                 break
 
