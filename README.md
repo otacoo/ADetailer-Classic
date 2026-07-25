@@ -1,5 +1,11 @@
-# ADetailer Neo
-The good ol' [ADetailer](https://github.com/Bing-su/adetailer) extension, which performs automatic masking and inpainting, completely rewritten for [Forge Neo](https://github.com/Haoming02/sd-webui-forge-classic/tree/neo), now ***lighter, faster, and prettier*** :tm:
+# ADetailer Classic
+
+> [!Note]
+> This a compatibility port of Haoming02's [ADetailer Neo](https://github.com/Haoming02/ADetailer-Neo) to work on **Classic**.\
+> All credit goes to them.\
+> This fork simply modifies some imports and code to work with older versions of Pydantic (validator) and Gradio (range slider).
+
+The good ol' [ADetailer](https://github.com/Bing-su/adetailer) extension, which performs automatic masking and inpainting, completely rewritten for [Forge Classic](https://github.com/Haoming02/sd-webui-forge-classic/tree/classic), now ***lighter, faster, and prettier*** :tm:
 
 - **Download ZIP:** `68 KB` &rarr; `38 KB`
 
@@ -9,9 +15,6 @@ The good ol' [ADetailer](https://github.com/Bing-su/adetailer) extension, which 
 
 ## Features
 After a generation, use **YOLO** or **MediaPipe** model(s) to detect certain regions *(**e.g.** face)* to perform **Inpainting**, improving fine details automatically
-
-> [!Note]
-> Not taking feature requests ; this repo is only meant as the "official" fork that is guaranteed to work with **Forge Neo** ; if you need other features, consider [this fork](https://github.com/abzaloff/aadetailer-neoforge) instead
 
 ## Models
 On a fresh launch, this Extension will download the following **10** detector models into the `models/adetailer/` folder
