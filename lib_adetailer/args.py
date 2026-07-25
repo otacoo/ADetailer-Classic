@@ -8,12 +8,11 @@ from typing import Any, Literal, NamedTuple, Optional
 
 from pydantic import (
     BaseModel,
-    ConfigDict,
     Field,
     NonNegativeInt,
     PositiveFloat,
     PositiveInt,
-    field_validator,
+    validator,
 )
 
 
@@ -41,7 +40,8 @@ class ArgsList(UserList):
 
 
 class ADetailerArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    class Config:
+        extra = "forbid"
 
     ad_model: str = "None"
     ad_model_classes: str = ""
@@ -65,9 +65,9 @@ class ADetailerArgs(BaseModel):
     ad_inpaint_width: PositiveInt = 512
     ad_inpaint_height: PositiveInt = 512
     ad_use_steps: bool = False
-    ad_steps: PositiveInt = Field(default=20, ge=1, le=150)
+    ad_steps: int = Field(default=20, ge=1, le=150)
     ad_use_cfg_scale: bool = False
-    ad_cfg_scale: PositiveFloat = Field(default=4.0, ge=1.0, le=24.0)
+    ad_cfg_scale: float = Field(default=4.0, ge=1.0, le=24.0)
     ad_use_checkpoint: bool = False
     ad_checkpoint: Optional[str] = None
     ad_use_vae: bool = False
@@ -84,8 +84,7 @@ class ADetailerArgs(BaseModel):
     ad_controlnet_guidance_start_end: tuple[float, float] = Field(default=(0.0, 1.0))
     is_api: bool = True
 
-    @field_validator("is_api", mode="before")
-    @classmethod
+    @validator("is_api", pre=True)
     def is_api_validator(cls, v: Any):
         return type(v) is not tuple
 

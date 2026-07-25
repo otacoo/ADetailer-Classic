@@ -5,7 +5,6 @@ from types import SimpleNamespace
 from typing import Any
 
 import gradio as gr
-from gradio_rangeslider import RangeSlider
 
 from modules.launch_utils import is_installed
 from modules.ui_components import FormColumn, FormRow, InputAccordion
@@ -194,23 +193,71 @@ def _ui_group(n: int, is_img2img: bool, webui_info: WebuiInfo):
     state = gr.State(lambda: state_init(w))
 
     for attr in ALL_ARGS.attrs:
+        if attr == "ad_controlnet_guidance_start_end":
+            continue
         widget = getattr(w, attr)
         on_change = partial(on_widget_change, attr=attr)
         widget.change(fn=on_change, inputs=[state, widget], outputs=state, queue=False)
 
-    all_inputs = [state, *w.tolist()]
+    def _cnet_change(state, start, end):
+        state = state.copy()
+        if "is_api" in state:
+            state.pop("is_api")
+        state["ad_controlnet_guidance_start_end"] = (start, end)
+        return state
+
+    w._cnet_gse_start.change(
+        fn=_cnet_change,
+        inputs=[state, w._cnet_gse_start, w._cnet_gse_end],
+        outputs=state, queue=False, show_progress=False,
+    )
+    w._cnet_gse_end.change(
+        fn=_cnet_change,
+        inputs=[state, w._cnet_gse_start, w._cnet_gse_end],
+        outputs=state, queue=False, show_progress=False,
+    )
+
+    def _on_generate(state, *values):
+        d = dict(state) if isinstance(state, dict) else {}
+        idx = 0
+        for attr in ALL_ARGS.attrs:
+            if attr == "ad_controlnet_guidance_start_end":
+                d[attr] = (values[idx], values[idx + 1])
+                idx += 2
+            else:
+                d[attr] = values[idx]
+                idx += 1
+        d["is_api"] = ()
+        return d
+
+    all_inputs = [state]
+    for attr in ALL_ARGS.attrs:
+        if attr == "ad_controlnet_guidance_start_end":
+            all_inputs.extend([w._cnet_gse_start, w._cnet_gse_end])
+        else:
+            all_inputs.append(getattr(w, attr))
+
     target_button = webui_info.i2i_button if is_img2img else webui_info.t2i_button
-    target_button.click(fn=on_generate, inputs=all_inputs, outputs=state, queue=False)
+    target_button.click(fn=_on_generate, inputs=all_inputs, outputs=state, queue=False)
 
     infotext_fields: list[tuple[str, str]] = []
 
-    def _parse(d: dict):
+    def _parse_cnet_start(d: dict):
         v = d.get("ADetailer ControlNet guidance start/end" + suffix(n), None)
-        return gr.skip() if v is None else gr.update(value=literal_eval(v))
+        if v is None:
+            return gr.skip()
+        return gr.update(value=literal_eval(v)[0])
+
+    def _parse_cnet_end(d: dict):
+        v = d.get("ADetailer ControlNet guidance start/end" + suffix(n), None)
+        if v is None:
+            return gr.skip()
+        return gr.update(value=literal_eval(v)[1])
 
     for attr, name in ALL_ARGS:
         if name == "ADetailer ControlNet guidance start/end":
-            infotext_fields.append((getattr(w, attr), _parse))
+            infotext_fields.append((w._cnet_gse_start, _parse_cnet_start))
+            infotext_fields.append((w._cnet_gse_end, _parse_cnet_end))
         else:
             infotext_fields.append((getattr(w, attr), name + suffix(n)))
 
@@ -578,11 +625,21 @@ def controlnet(w: Widgets, n: int, is_img2img: bool):
                 value=1.0,
                 elem_id=eid("ad_controlnet_weight"),
             )
-            w.ad_controlnet_guidance_start_end = RangeSlider(
-                label="ControlNet Guidance Start/End",
+            w._cnet_gse_start = gr.Slider(
+                label="Guidance Start",
                 minimum=0.0,
                 maximum=1.0,
                 step=0.05,
-                value=(0.0, 1.0),
-                elem_id=eid("ad_controlnet_guidance_start_end"),
+                value=0.0,
+                elem_id=eid("ad_controlnet_guidance_start_end") + "_start",
             )
+            w._cnet_gse_end = gr.Slider(
+                label="Guidance End",
+                minimum=0.0,
+                maximum=1.0,
+                step=0.05,
+                value=1.0,
+                elem_id=eid("ad_controlnet_guidance_start_end") + "_end",
+            )
+            # compat: keep reference for state_init / tolist
+            w.ad_controlnet_guidance_start_end = gr.State(value=(0.0, 1.0))
