@@ -1,4 +1,5 @@
 import os
+import tempfile
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -33,6 +34,9 @@ def ultralytics_predict(
         conf=confidence,
         device=device,
         imgsz=1024 if getattr(opts, "ad_hd_yolo", False) else 640,
+        project=os.path.join(tempfile.gettempdir(), "adetailer-classic"),
+        name="predict",
+        exist_ok=True,
     )
 
     bboxes = pred[0].boxes.xyxy.cpu().numpy()
