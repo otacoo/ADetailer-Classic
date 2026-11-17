@@ -77,7 +77,6 @@ class ADetailerArgs(BaseModel):
     ad_scheduler: str = "Use same scheduler"
     ad_use_noise_multiplier: bool = False
     ad_noise_multiplier: float = Field(default=1.0, ge=0.5, le=1.5)
-    ad_restore_face: bool = False
     ad_controlnet_model: str = "None"
     ad_controlnet_module: str = "None"
     ad_controlnet_weight: float = Field(default=1.0, ge=0.0, le=1.0)
@@ -191,7 +190,6 @@ class ADetailerArgs(BaseModel):
                 "ADetailer noise multiplier",
             ],
         )
-        ppop("ADetailer restore face")
         ppop(
             "ADetailer ControlNet model",
             [
@@ -256,7 +254,6 @@ _all_args = [
     ("ad_scheduler", "ADetailer scheduler"),
     ("ad_use_noise_multiplier", "ADetailer use separate noise multiplier"),
     ("ad_noise_multiplier", "ADetailer noise multiplier"),
-    ("ad_restore_face", "ADetailer restore face"),
     ("ad_controlnet_model", "ADetailer ControlNet model"),
     ("ad_controlnet_module", "ADetailer ControlNet module"),
     ("ad_controlnet_weight", "ADetailer ControlNet weight"),

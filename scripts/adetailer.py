@@ -455,7 +455,6 @@ class AfterDetailerScript(scripts.Script):
             cfg_scale=cfg_scale,
             width=width,
             height=height,
-            restore_faces=args.ad_restore_face,
             tiling=p.tiling,
             extra_generation_params=copy_extra_params(p.extra_generation_params),
             do_not_save_samples=True,

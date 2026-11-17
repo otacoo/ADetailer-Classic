@@ -584,12 +584,6 @@ def inpainting(w: Widgets, n: int, is_img2img: bool, webui_info: WebuiInfo):
                 )
 
         with FormRow():
-            w.ad_restore_face = gr.Checkbox(
-                value=False,
-                label="Restore Faces after ADetailer",
-                elem_id=eid("ad_restore_face"),
-            )
-
             w.ad_denoising_strength = gr.Slider(
                 label="Inpaint Denoising Strength",
                 minimum=0.0,
